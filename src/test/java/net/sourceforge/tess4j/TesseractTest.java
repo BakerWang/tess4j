@@ -16,35 +16,33 @@
 package net.sourceforge.tess4j;
 
 import java.awt.Rectangle;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
-
-import javax.imageio.IIOImage;
+import java.util.Map;
+import java.util.HashMap;
 import javax.imageio.ImageIO;
 
 import net.sourceforge.tess4j.util.ImageHelper;
-import net.sourceforge.tess4j.util.ImageIOHelper;
 import net.sourceforge.tess4j.util.LoggHelper;
 import net.sourceforge.tess4j.util.Utils;
 
 import net.sourceforge.tess4j.ITesseract.RenderedFormat;
 import net.sourceforge.tess4j.ITessAPI.TessPageIteratorLevel;
 
-import static org.junit.Assert.*;
-
 import com.recognition.software.jdeskew.ImageDeskew;
 
+import static org.junit.Assert.*;
 import org.junit.After;
 import org.junit.AfterClass;
-
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -151,28 +149,18 @@ public class TesseractTest {
      * @throws Exception while processing image.
      */
     @Test
-    public void testDoOCR_List_Rectangle() throws Exception {
-        File imageFile = null;
+    public void testDoOCR_PDF() throws Exception {
+        logger.info("doOCR on a PDF document");       
+        File inputFile = new File(this.testResourcesDataPath, "eurotext.pdf");
         String expResult = "The (quick) [brown] {fox} jumps!\nOver the $43,456.78 <lazy> #90 dog";
-        String result = "<empty>";
         try {
-            logger.info("doOCR on a PDF document");
-            imageFile = new File(this.testResourcesDataPath, "eurotext.pdf");
-            List<IIOImage> imageList = ImageIOHelper.getIIOImageList(imageFile);
-            result = instance.doOCR(imageList, null);
+            String result = instance.doOCR(inputFile, null);
             logger.info(result);
             assertEquals(expResult, result.substring(0, expResult.length()));
-        } catch (IOException e) {
-            logger.error("Exception-Message: '{}'. Imagefile: '{}'", e.getMessage(), imageFile.getAbsoluteFile(), e);
-            fail();
         } catch (TesseractException e) {
-            logger.error("Exception-Message: '{}'. Imagefile: '{}'", e.getMessage(), imageFile.getAbsoluteFile(), e);
-            fail();
-        } catch (StringIndexOutOfBoundsException e) {
-            logger.error("Exception-Message: '{}'. Imagefile: '{}'", e.getMessage(), imageFile.getAbsoluteFile(), e);
+            logger.error("Exception-Message: '{}'. Imagefile: '{}'", e.getMessage(), inputFile.getAbsoluteFile(), e);
             fail();
         }
-
     }
 
     /**
@@ -186,9 +174,42 @@ public class TesseractTest {
         File imageFile = new File(this.testResourcesDataPath, "eurotext.png");
         BufferedImage bi = ImageIO.read(imageFile);
         String expResult = "The (quick) [brown] {fox} jumps!\nOver the $43,456.78 <lazy> #90 dog";
-        String result = instance.doOCR(bi);
-        logger.info(result);
-        assertEquals(expResult, result.substring(0, expResult.length()));
+
+        Map<String, Integer> types = new HashMap<>();
+        types.put("TYPE_INT_RGB", BufferedImage.TYPE_INT_RGB);
+        types.put("TYPE_INT_ARGB", BufferedImage.TYPE_INT_ARGB);
+        types.put("TYPE_INT_ARGB_PRE", BufferedImage.TYPE_INT_ARGB_PRE);
+        types.put("TYPE_INT_BGR", BufferedImage.TYPE_INT_BGR);
+        types.put("TYPE_3BYTE_BGR", BufferedImage.TYPE_3BYTE_BGR);
+        types.put("TYPE_4BYTE_ABGR", BufferedImage.TYPE_4BYTE_ABGR);
+        types.put("TYPE_4BYTE_ABGR_PRE", BufferedImage.TYPE_4BYTE_ABGR_PRE);
+        types.put("TYPE_USHORT_565_RGB", BufferedImage.TYPE_USHORT_565_RGB);
+        types.put("TYPE_USHORT_555_RGB", BufferedImage.TYPE_USHORT_555_RGB);
+        types.put("TYPE_BYTE_GRAY", BufferedImage.TYPE_BYTE_GRAY);
+        types.put("TYPE_USHORT_GRAY", BufferedImage.TYPE_USHORT_GRAY);
+        types.put("TYPE_BYTE_BINARY", BufferedImage.TYPE_BYTE_BINARY);
+        types.put("TYPE_BYTE_INDEXED", BufferedImage.TYPE_BYTE_INDEXED);
+
+        for (Map.Entry<String, Integer> entry: types.entrySet()) {
+            if (entry.getValue() == bi.getType()) {
+                String result = instance.doOCR(bi);
+                logger.info("BufferedImage type: " + entry.getKey() + " (Original)");
+                logger.info(result);
+                logger.info("");
+                assertEquals(expResult, result.substring(0, expResult.length()));
+            } else {
+                BufferedImage imageWithType = new BufferedImage(bi.getWidth(), bi.getHeight(), entry.getValue());
+                Graphics2D g = imageWithType.createGraphics();
+                g.drawImage(bi, 0, 0, null);
+                g.dispose();
+
+                String result = instance.doOCR(imageWithType);
+                logger.info("BufferedImage type: " + entry.getKey());
+                logger.info(result);
+                logger.info("");
+                assertEquals(expResult, result.substring(0, expResult.length()));
+            }
+        }
     }
 
     /**
@@ -248,14 +269,14 @@ public class TesseractTest {
         BufferedImage bi = ImageIO.read(imageFile);
         List<Word> result = instance.getWords(bi, pageIteratorLevel);
 
-        //print the complete result
+        //print the complete results
         for (Word word : result) {
             logger.info(word.toString());
         }
 
         List<String> text = new ArrayList<String>();
         for (Word word : result.subList(0, expResults.length)) {
-            text.add(word.getText());
+            text.add(word.getText().trim());
         }
 
         assertArrayEquals(expResults, text.toArray());
@@ -263,7 +284,7 @@ public class TesseractTest {
 
     /**
      * Test of getSegmentedRegions method, of class Tesseract.
-     * 
+     *
      * @throws java.lang.Exception
      */
     @Test
@@ -280,5 +301,25 @@ public class TesseractTest {
         }
 
         assertTrue(result.size() > 0);
+    }
+
+    /**
+     * Test of createDocumentsWithResults method, of class Tesseract1.
+     *
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testCreateDocumentsWithResults() throws Exception {
+        logger.info("createDocumentsWithResults for multiple images at given TessPageIteratorLevel");
+        File imageFile1 = new File(this.testResourcesDataPath, "eurotext.pdf");
+        File imageFile2 = new File(this.testResourcesDataPath, "eurotext.png");
+        String outputbase1 = "target/test-classes/test-results/docrenderer-3";
+        String outputbase2 = "target/test-classes/test-results/docrenderer-4";
+        List<RenderedFormat> formats = new ArrayList<RenderedFormat>(Arrays.asList(RenderedFormat.HOCR, RenderedFormat.PDF, RenderedFormat.TEXT));
+        List<OCRResult> results = instance.createDocumentsWithResults(new String[]{imageFile1.getPath(), imageFile2.getPath()}, new String[]{outputbase1, outputbase2}, formats, TessPageIteratorLevel.RIL_WORD);
+        assertTrue(new File(outputbase1 + ".pdf").exists());
+        assertEquals(2, results.size());
+        assertTrue(results.get(0).getConfidence() > 0);
+        assertEquals(66, results.get(0).getWords().size());
     }
 }

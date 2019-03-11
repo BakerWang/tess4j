@@ -147,3 +147,37 @@ Version 4.0.2 (3 May 2018)
 - Replace JNA string constant Platform.RESOURCE_PREFIX
 - Update jai-imageio url
 - Update Lept4J to 1.9.4
+
+Version 4.1.0 (20 July 2018)
+- Upgrade to Tesseract 4.0.0-beta.3 (b502bbf)
+- Update Lept4J to 1.10.0
+- Improve handling of PDF
+- Refactor
+
+Version 4.1.1 (28 July 2018)
+- Properly dispose of resources and temporary image files
+- Clean up code and test output resources
+- Fix NPE in Java 10
+
+Version 4.2.0 (11 August 2018)
+- Upgrade to Tesseract 4.0.0-beta.4 (fd49206)
+
+Version 4.2.1 (11 August 2018)
+- Recompile using JDK8 to avoid NoSuchMethodError: Method flip() does not exist in class java.nio.ByteBuffer
+- Use explicit cast for compatibility with covariant return type on JDK 9's ByteBuffer methods, e.g., flip()
+
+Version 4.2.2 (3 September 2018)
+- Fix Invalid memory access exception due of incorrect bit depth value
+
+Version 4.2.3 (17 October 2018)
+- Update pdfbox dependencies
+
+Version 4.3.0 (29 October 2018)
+- Upgrade to Tesseract 4.0.0 (5131699)
+
+Version 4.3.1 (26 December 2018)
+- Fix Windows build
+- Improve RenderedImage to ByteBuffer conversion
+
+Version 4.4.0-SNAPSHOT (10 March 2019)
+- Upgrade to Tesseract 4.1.0-RC1 (d2c3309)

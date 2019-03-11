@@ -612,4 +612,84 @@ public class TessAPIImpl implements TessAPI {
     public float TessChoiceIteratorConfidence(ITessAPI.TessChoiceIterator handle) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
+
+    @Override
+    public ETEXT_DESC TessMonitorCreate() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public void TessMonitorDelete(ETEXT_DESC monitor) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public void TessMonitorSetCancelFunc(ETEXT_DESC monitor, TessCancelFunc cancelFunc) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public void TessMonitorSetCancelThis(ETEXT_DESC monitor, Pointer cancelThis) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public Pointer TessMonitorGetCancelThis(ETEXT_DESC monitor) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public void TessMonitorSetProgressFunc(ETEXT_DESC monitor, TessProgressFunc progressFunc) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public int TessMonitorGetProgress(ETEXT_DESC monitor) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public void TessMonitorSetDeadlineMSecs(ETEXT_DESC monitor, int deadline) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public TessResultRenderer TessAltoRendererCreate(String outputbase) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public Pointer TessBaseAPIGetAltoText(TessBaseAPI handle, int page_number) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public TessResultRenderer TessLSTMBoxRendererCreate(String outputbase) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public TessResultRenderer TessWordStrBoxRendererCreate(String outputbase) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public Pointer TessBaseAPIGetLSTMBoxText(TessBaseAPI handle, int page_number) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public Pointer TessBaseAPIGetWordStrBoxText(TessBaseAPI handle, int page_number) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public TessResultRenderer TessTsvRendererCreate(String outputbase) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public Pointer TessBaseAPIGetTsvText(TessBaseAPI handle, int page_number) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
 }

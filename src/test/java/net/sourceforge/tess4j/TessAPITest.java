@@ -213,7 +213,7 @@ public class TessAPITest {
     @Test
     public void testTessVersion() {
         logger.info("TessVersion");
-        String expResult = "4.0.0-beta.1";
+        String expResult = "4.1.0";
         String result = api.TessVersion();
         logger.info(result);
         assertTrue(result.startsWith(expResult));
@@ -361,6 +361,49 @@ public class TessAPITest {
         String result = utf8Text.getString(0);
         api.TessDeleteText(utf8Text);
         assertTrue(result.contains("<div class='ocr_page'"));
+    }
+    
+    /**
+     * Test of TessBaseAPIGetAltoText method, of class TessAPI.
+     *
+     * @throws Exception while getting Alto text
+     */
+    @Test
+    public void testTessBaseAPIGetAltoText() throws Exception {
+        logger.info("TessBaseAPIGetAltoText");
+        String filename = String.format("%s/%s", this.testResourcesDataPath, "eurotext.tif");
+        File tiff = new File(filename);
+        BufferedImage image = ImageIO.read(new FileInputStream(tiff));
+        ByteBuffer buf = ImageIOHelper.convertImageData(image);
+        int bpp = image.getColorModel().getPixelSize();
+        int bytespp = bpp / 8;
+        int bytespl = (int) Math.ceil(image.getWidth() * bpp / 8.0);
+        api.TessBaseAPISetPageSegMode(handle, TessPageSegMode.PSM_AUTO);
+        api.TessBaseAPIInit3(handle, datapath, language);
+        api.TessBaseAPISetImage(handle, buf, image.getWidth(), image.getHeight(), bytespp, bytespl);
+        int page_number = 0;
+        Pointer utf8Text = api.TessBaseAPIGetAltoText(handle, page_number);
+        String result = utf8Text.getString(0);
+        api.TessDeleteText(utf8Text);
+        assertTrue(result.contains("<Page WIDTH=\"1024\" HEIGHT=\"800\" PHYSICAL_IMG_NR=\"0\" ID=\"page_0\">"));
+        
+        // WordStr Box output
+        utf8Text = api.TessBaseAPIGetWordStrBoxText(handle, page_number);
+        result = utf8Text.getString(0);
+        api.TessDeleteText(utf8Text);
+        assertTrue(result.contains("WordStr"));
+        
+        // TSV output
+        utf8Text = api.TessBaseAPIGetTsvText(handle, page_number);
+        result = utf8Text.getString(0);
+        api.TessDeleteText(utf8Text);
+        assertTrue(result.contains("1\t"));
+
+        // LSTM Box output
+        utf8Text = api.TessBaseAPIGetLSTMBoxText(handle, page_number);
+        result = utf8Text.getString(0);
+        api.TessDeleteText(utf8Text);
+        assertTrue(result.contains("\t"));
     }
 
     /**
@@ -639,12 +682,12 @@ public class TessAPITest {
             return;
         }
 
-        String outputbase = "target/test-classes/test-results/outputbase";
+        String outputbase = "target/test-classes/test-results/ResultRenderer";
         TessResultRenderer renderer = api.TessHOcrRendererCreate(outputbase);
         api.TessResultRendererInsert(renderer, api.TessBoxTextRendererCreate(outputbase));
         api.TessResultRendererInsert(renderer, api.TessTextRendererCreate(outputbase));
         String dataPath = api.TessBaseAPIGetDatapath(handle);
-        api.TessResultRendererInsert(renderer, api.TessPDFRendererCreate(outputbase, dataPath, TRUE));
+        api.TessResultRendererInsert(renderer, api.TessPDFRendererCreate(outputbase, dataPath, FALSE));
         int result = api.TessBaseAPIProcessPages(handle, image, null, 0, renderer);
 
         if (result == FALSE) {
